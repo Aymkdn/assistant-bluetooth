@@ -55,6 +55,8 @@ Ensuite, depuis IFTTT, voici un exemple d'applet à créer ; prenons la situatio
   12) Dites : « OK Google, mets de la musique », puis s'assurer que l'enceinte Bluetooth est allumée, et dire : « OK Google, connecte toi à la douche »  
   13) Google Home devrait alors transférer la musique sur l'autre enceinte
 
+Remarque : il est aussi possible de demander la déconnexion d'une enceinte en utilisant le mot clé **disconnect** au lieu de **connect** lors de la commande PushBullet (étape 10 ci-dessus).
+
 En image :  
 
 ![applet IFTTT](https://user-images.githubusercontent.com/946315/39955270-389f661a-55cc-11e8-9d8e-e1404f3f045e.PNG)
