@@ -34,7 +34,7 @@ AssistantBluetooth.prototype.action = function(commande) {
   if (!nom) {
     return Promise.reject("[assistant-bluetooth] Erreur : la commande passée ("+commande+") semble incorrecte.");
   }
-  console.log("[assistant-bluetooth] Connexion à "+nom);
+  console.log("[assistant-bluetooth] "+(connect?"Connexion à":"Déconnexion de")+" "+nom);
   // on transmet la demande
   return request({
     url:"http://"+this.host+":8008/setup/bluetooth/connect",
