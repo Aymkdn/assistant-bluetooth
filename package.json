@@ -1,9 +1,9 @@
 {
-  "name": "assistant-template",
-  "version": "2.0.0",
-  "description": "Exemple de la structure d'un plugin",
+  "name": "assistant-bluetooth",
+  "version": "1.0.0",
+  "description": "Plugin Bluetooth pour un Assistant via le package assistant-plugins",
   "author": "aymkdn",
-  "main":"template.js",
-  "repository":"https://github.com/Aymkdn/assistant-template/",
+  "main":"bluetooth.js",
+  "repository":"https://github.com/Aymkdn/assistant-bluetooth/",
   "license": "MIT"
 }

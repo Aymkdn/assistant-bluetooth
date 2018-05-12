@@ -1,19 +1,59 @@
-# assistant-template
+# assistant-bluetooth
 
-Dans le fichier `template.js` on retrouve la structure minimale à utiliser pour créer un autre plugin.
+Ce plugin de [`assistant-plugins`](https://aymkdn.github.io/assistant-plugins/) permet de faire de connecter son Google Home à une enceinte Bluetooth.
+
+**Ne pas l'installer si vous ne possédez pas de Google Home !**
+
+## Installation
+
+Si vous n'avez pas installé [`assistant-plugins`](https://aymkdn.github.io/assistant-plugins/), alors il faut le faire, et sélectionner **bluetooth** comme plugin.
+
+Si vous avez déjà installé [`assistant-plugins`](https://aymkdn.github.io/assistant-plugins/), et que vous souhaitez ajouter ce plugin, alors :
+  - Pour Windows, télécharger [`install_bluetooth.bat`](https://github-proxy.kodono.info/?q=https://raw.githubusercontent.com/Aymkdn/assistant-bluetooth/master/install_bluetooth.bat&download=install_bluetooth.bat) dans le répertoire `assistant-plugins`, puis l'exécuter en double-cliquant dessus.  
+  - Pour Linux/MacOS, ouvrir une console dans le répertoire `assistant-plugins` et taper :  
+  `npm install assistant-bluetooth@latest --save && npm run-script postinstall`
 
 ## Configuration
 
-Si vous avez besoin de configuration, elle doit être stockée dans le fichier `configuration.json`.
+Éditer le fichier `configuration.json` du répertoire `assistant-plugins` et y indiquer l'adresse IP de votre Google Home.
+
+l'adresse IP de votre Google Home se trouve sur l'application Google Home de votre téléphone :
+
+  1) Ouvrir l'application Google Home  
+  2) Cliquer sur l'icône en haut à droite (*un téléviseur avec une enceinte*)  
+  3) Votre appareil Google Home devrait apparaitre  
+  4) Cliquer sur les *trois points* de votre appareil et choisir **Paramètres**  
+  5) Descendre tout en bas jusqu'à la section **Informations**  
+  6) Utiliser l'adresse IP qui est donnée (tout en bas)
+  
+La section du fichier `configuration.json` qui nous intéresse devrait ressembler à la partie ci-dessous (ici on va dire que l'IP est 192.168.0.13) :
+```javascript
+  "plugins": {
+    "bluetooth": {
+      "hosts":"192.168.0.13"
+    }
+  }
+```
 
 ## Utilisation
 
-Le plugin sera appelé quand le message `template_XXX` sera envoyé à Pushbullet (depuis IFTTT), avec `template` le nom du plugin, et `XXX` la commande envoyée au plugin en question.
+Il faut d'abord **appareiller le Google Home avec l'enceinte Bluetooth souhaitée** (il existe plusieurs tutoriaux sur Internet qui expliquent comment faire... par exemple sur [stylistme.com](https://stylistme.com/comment-connecter-une-enceinte-bluetooth-a-google-home/)).
 
-## Faire Valider
+Ensuite, depuis IFTTT, voici un exemple d'applet à créer ; prenons la situation où une enceinte Bluetooth se trouve dans la douche, et que le nom de l'enceinte est "JBL Clip 2" :
 
-Une fois que tout est prêt, vous pouvez demander à ajouter votre plugin sur [https://github.com/Aymkdn/assistant-plugins](https://github.com/Aymkdn/assistant-plugins). Je vérifierai que tout est bon et je l'ajouterai.
+  1) S'assurer que `assistant-plugins` est bien lancé  
+  2) Créer une nouvelle *applet* dans IFTTT : [https://ifttt.com/create](https://ifttt.com/create)  
+  3) Cliquer sur **this** puis choisir **Google Assistant**  
+  4) Choisir la carte **Say a simple phrase**  
+  5) Dans *« What do you want to say? »* mettre une phrase, par exemple : `connecte toi à la douche`  
+  6) Remplir les autres champs de la carte  
+  7) Maintenant, cliquer sur **that** puis choisir **Pushbullet**  
+  8) Choisir la carte **Push a Note**  
+  9) Dans le champs *« Title »*, mettre `Assistant`  
+  10) Dans le champs *« Message »*, mettre `bluetooth_connect JBL Clip 2` (remplacer "JBL Clip 2" par le nom de votre enceinte telle qu'elle apparait dans l'application Google Home)  
+  11) Enregistrer puis cliquer sur **Finish**  
+  12) Dites : « OK Google, mets de la musique », puis s'assurer que l'enceinte Bluetooth est allumée, et dire : « OK Google, connecte toi à la douche »  
+  13) Google Home devrait alors transférer la musique sur l'autre enceinte
 
-## Publication
-
-Une fois votre plugin validé et prêt, vous pouvez le publier sur [https://www.npmjs.com/](https://www.npmjs.com/)
+En image : 
+![applet IFTTT](https://user-images.githubusercontent.com/946315/39955270-389f661a-55cc-11e8-9d8e-e1404f3f045e.PNG)

@@ -1,12 +1,11 @@
 var request = require('request-promise-native'); // si vous souhaitez faire des requêtes HTTP
 
 /**
- * on crée une fonction `AssistantTemplate`
+ * on crée une fonction `AssistantBluetooth`
  * @param {Object} configuration L'objet `configuration` qui vient du fichier configuration.json
  */
-var AssistantTemplate = function(configuration) {
-  // par exemple configuration.key si on a `{ "key": "XXX" }` dans le fichier configuration.json
-  // exemple: this.key = configuration.key;
+var AssistantBluetooth = function(configuration) {
+  this.host = configuration.host;
 }
 
 /**
@@ -15,10 +14,10 @@ var AssistantTemplate = function(configuration) {
  * @param  {Object} plugins Un objet représentant les autres plugins chargés
  * @return {Promise}
  */
-AssistantTemplate.prototype.init = function(plugins) {
+AssistantBluetooth.prototype.init = function(plugins) {
   this.plugins = plugins;
   // si une configuration est requise (en reprenant l'exemple de "key") :
-  // if (!this.key) return Promise.reject("[assistant-template] Erreur : vous devez configurer ce plugin !");
+  if (!this.host) return Promise.reject("[assistant-bluetooth] Erreur : vous devez configurer ce plugin en fournissant l'IP de votre Google Home !");
   return Promise.resolve(this);
 };
 
@@ -28,9 +27,27 @@ AssistantTemplate.prototype.init = function(plugins) {
  * @param {String} commande La commande envoyée depuis IFTTT par Pushbullet
  * @return {Promise}
  */
-AssistantTemplate.prototype.action = function(commande) {
-  // faire quelque chose avec `commande`
-  // votre code sera ici principalement
+AssistantBluetooth.prototype.action = function(commande) {
+  // 'commande' est 'connect/disconnect NOM'
+  var connect = commande.startsWith('connect');
+  var nom = commande.replace(/(dis)?connect /,"");
+  if (!nom) {
+    return Promise.reject("[assistant-bluetooth] Erreur : la commande passée ("+commande+") semble incorrecte.");
+  }
+  console.log("[assistant-bluetooth] Connexion à "+nom);
+  // on transmet la demande
+  return request({
+    url:"http://"+this.host+":8008/setup/bluetooth/connect",
+    method:"POST",
+    json:true,
+    body:{"connect":connect,"name":nom},
+    headers:{
+      'Content-Type': 'application/json'
+    }
+  })
+  .catch(error => {
+    console.log("[assistant-bluetooth] Erreur : la connexion au Google Home a eu un problème : ",error.statusCode,error.statusMessage);
+  })
 };
 
 /**
@@ -41,9 +58,9 @@ AssistantTemplate.prototype.action = function(commande) {
  * @return {Promise} resolve(this)
  */
 exports.init=function(configuration, plugins) {
-  return new AssistantTemplate(configuration).init(plugins)
+  return new AssistantBluetooth(configuration).init(plugins)
   .then(function(resource) {
-    console.log("[assistant-template] Plugin chargé et prêt.");
+    console.log("[assistant-bluetooth] Plugin chargé et prêt.");
     return resource;
   })
 }
