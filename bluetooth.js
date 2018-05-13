@@ -30,12 +30,26 @@ AssistantBluetooth.prototype.init = function(plugins) {
 AssistantBluetooth.prototype.action = function(commande) {
   // 'commande' est 'connect/disconnect NOM'
   var connect = commande.startsWith('connect');
-  var nom = commande.replace(/(dis)?connect /,"");
+  var nom = commande.replace(/(dis)?connect/,"").trim();
   var host = this.host;
-  if (!nom) {
+  if (connect && !nom) {
     return Promise.reject("[assistant-bluetooth] Erreur : la commande passée ("+commande+") semble incorrecte.");
   }
-  console.log("[assistant-bluetooth] Connexion à "+nom);
+  console.log("[assistant-bluetooth] "+(connect?"Connexion à "+nom:"Déconnexion de l'enceinte Bluetooth"));
+  if (!connect) {
+    return request({
+      url:"http://"+host+":8008/setup/bluetooth/connect",
+      method:"POST",
+      json:true,
+      body:{"connect":false},
+      headers:{
+        'Content-Type': 'application/json'
+      }
+    })
+    .catch(error => {
+      console.log("[assistant-bluetooth] Erreur : la connexion au Google Home a eu un problème : ",error,error.statusCode,error.statusMessage);
+    })
+  }
   // on cherche l'address mac
   return request({
     url:"http://"+host+":8008/setup/bluetooth/get_bonded"
@@ -44,7 +58,6 @@ AssistantBluetooth.prototype.action = function(commande) {
     response = JSON.parse(response);
     if (!Array.isArray(response)) response = [ response ];
     for (var i=0; i<response.length; i++) {
-      console.log(response[i].name, response[i].mac_address)
       if (response[i].name.toLowerCase() === nom.toLowerCase()) {
         return request({
           url:"http://"+host+":8008/setup/bluetooth/connect",
