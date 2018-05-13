@@ -35,42 +35,47 @@ AssistantBluetooth.prototype.action = function(commande) {
   if (connect && !nom) {
     return Promise.reject("[assistant-bluetooth] Erreur : la commande passée ("+commande+") semble incorrecte.");
   }
-  console.log("[assistant-bluetooth] "+(connect?"Connexion à "+nom:"Déconnexion de l'enceinte Bluetooth"));
-  if (!connect) {
-    return request({
-      url:"http://"+host+":8008/setup/bluetooth/connect",
-      method:"POST",
-      json:true,
-      body:{"connect":false},
-      headers:{
-        'Content-Type': 'application/json'
-      }
-    })
-    .catch(error => {
-      console.log("[assistant-bluetooth] Erreur : la connexion au Google Home a eu un problème : ",error,error.statusCode,error.statusMessage);
-    })
-  }
-  // on cherche l'address mac
+  if (!connect) console.log("[assistant-bluetooth] Déconnexion de l'enceinte Bluetooth");
+  // on doit d'abord se déconnecter
   return request({
-    url:"http://"+host+":8008/setup/bluetooth/get_bonded"
+    url:"http://"+host+":8008/setup/bluetooth/connect",
+    method:"POST",
+    json:true,
+    body:{"connect":false},
+    headers:{
+      'Content-Type': 'application/json'
+    }
+  })
+  .then(function() {
+    if (!connect) {
+      return Promise.resolve(false);
+    } else {
+      // on cherche l'address mac
+      return request({
+        url:"http://"+host+":8008/setup/bluetooth/get_bonded"
+      })
+    }
   })
   .then(function(response) {
-    response = JSON.parse(response);
-    if (!Array.isArray(response)) response = [ response ];
-    for (var i=0; i<response.length; i++) {
-      if (response[i].name.toLowerCase() === nom.toLowerCase()) {
-        return request({
-          url:"http://"+host+":8008/setup/bluetooth/connect",
-          method:"POST",
-          json:true,
-          body:{"connect":connect,"mac_address":response[i].mac_address, profile:2},
-          headers:{
-            'Content-Type': 'application/json'
-          }
-        })
+    if (response!==false) {
+      response = JSON.parse(response);
+      if (!Array.isArray(response)) response = [ response ];
+      for (var i=0; i<response.length; i++) {
+        if (response[i].name.toLowerCase() === nom.toLowerCase()) {
+          console.log("[assistant-bluetooth] Connexion à "+nom);
+          return request({
+            url:"http://"+host+":8008/setup/bluetooth/connect",
+            method:"POST",
+            json:true,
+            body:{"connect":connect,"mac_address":response[i].mac_address, "profile":2},
+            headers:{
+              'Content-Type': 'application/json'
+            }
+          })
+        }
       }
+      return Promise.reject({statusCode:"000", statusMessage:'Appareil "'+nom+'" inconnu.'});
     }
-    return Promise.reject({statusCode:"000", statusMessage:'Appareil "'+nom+'" inconnu.'});
   })
   .catch(error => {
     console.log("[assistant-bluetooth] Erreur : la connexion au Google Home a eu un problème : ",error,error.statusCode,error.statusMessage);
