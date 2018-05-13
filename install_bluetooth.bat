@@ -1,1 +1,1 @@
-start cmd /k "npm install assistant-template --save --loglevel error && npm run-script postinstall"
+start cmd /k "npm install assistant-bluetooth --save --loglevel error && npm run-script postinstall"

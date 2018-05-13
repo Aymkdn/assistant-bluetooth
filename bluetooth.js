@@ -22,6 +22,44 @@ AssistantBluetooth.prototype.init = function(plugins) {
 };
 
 /**
+ * Se déconnecte d'une enceinte par défaut
+ *
+ * @return {Promise}
+ */
+AssistantBluetooth.prototype.disconnect = function() {
+  console.log("[assistant-bluetooth] Déconnexion de l'enceinte Bluetooth actuelle");
+  return request({
+    url:"http://"+this.host+":8008/setup/bluetooth/connect",
+    method:"POST",
+    json:true,
+    body:{"connect":false},
+    headers:{
+      'Content-Type': 'application/json'
+    }
+  })
+};
+
+/**
+ * Connecte l'enceinte
+ *
+ * @param {String} nom Nom de l'enceinte
+ * @param  {String} mac_address L'adresse MAC de l'enceinte
+ * @return {Promise}
+ */
+AssistantBluetooth.prototype.connect = function(nom, mac_address) {
+  console.log("[assistant-bluetooth] Connexion à "+nom);
+  return request({
+    url:"http://"+this.host+":8008/setup/bluetooth/connect",
+    method:"POST",
+    json:true,
+    body:{"connect":true,"mac_address":mac_address, "profile":2},
+    headers:{
+      'Content-Type': 'application/json'
+    }
+  })
+};
+
+/**
  * Fonction appelée par le système central
  *
  * @param {String} commande La commande envoyée depuis IFTTT par Pushbullet
@@ -31,50 +69,56 @@ AssistantBluetooth.prototype.action = function(commande) {
   // 'commande' est 'connect/disconnect NOM'
   var connect = commande.startsWith('connect');
   var nom = commande.replace(/(dis)?connect/,"").trim();
-  var host = this.host;
+  var _this = this;
   if (connect && !nom) {
     return Promise.reject("[assistant-bluetooth] Erreur : la commande passée ("+commande+") semble incorrecte.");
   }
-  if (!connect) console.log("[assistant-bluetooth] Déconnexion de l'enceinte Bluetooth");
-  // on doit d'abord se déconnecter
+  if (!connect) {
+    return this.disconnect();
+  }
+
+  // on va d'abord listé les appareils Bluetooth
   return request({
-    url:"http://"+host+":8008/setup/bluetooth/connect",
-    method:"POST",
-    json:true,
-    body:{"connect":false},
-    headers:{
-      'Content-Type': 'application/json'
-    }
-  })
-  .then(function() {
-    if (!connect) {
-      return Promise.resolve(false);
-    } else {
-      // on cherche l'address mac
-      return request({
-        url:"http://"+host+":8008/setup/bluetooth/get_bonded"
-      })
-    }
+    url:"http://"+_this.host+":8008/setup/bluetooth/get_bonded"
   })
   .then(function(response) {
-    if (response!==false) {
-      response = JSON.parse(response);
-      if (!Array.isArray(response)) response = [ response ];
-      for (var i=0; i<response.length; i++) {
-        if (response[i].name.toLowerCase() === nom.toLowerCase()) {
-          console.log("[assistant-bluetooth] Connexion à "+nom);
-          return request({
-            url:"http://"+host+":8008/setup/bluetooth/connect",
-            method:"POST",
-            json:true,
-            body:{"connect":connect,"mac_address":response[i].mac_address, "profile":2},
-            headers:{
-              'Content-Type': 'application/json'
-            }
-          })
+    response = JSON.parse(response);
+    if (!Array.isArray(response)) response = [ response ];
+    var mac_address, has_connected=false;
+    for (var i=0; i<response.length; i++) {
+      // on cherche l'enceinte demandée
+      if (response[i].name.toLowerCase() === nom.toLowerCase()) {
+        // on a besoin de l'adresse MAC
+        mac_address = response[i].mac_address;
+        // on regarde si cette enceinte est déjà connectée
+        if (response[i].connected) {
+          console.log("[assistant-bluetooth] L'enceinte "+nom+" est déjà connectée !");
+          return;
         }
       }
-      return Promise.reject({statusCode:"000", statusMessage:'Appareil "'+nom+'" inconnu.'});
+      // on regarde si une enceinte est déjà connectée, si oui on doit d'abord la déconnecter
+      if (response[i].connected) {
+        has_connected=true;
+      }
+    }
+
+    // si on n'a pas trouvé le device
+    if (!mac_address) return Promise.reject({statusCode:"000", statusMessage:'Appareil "'+nom+'" inconnu.'});
+
+    if (has_connected) {
+      console.log("[assistant-bluetooth] Connexion à "+nom+" dans quelques secondes...");
+      return _this.disconnect()
+      .then(function() {
+        return new Promise(function(prom_res, prom_rej) {
+          setTimeout(function() {
+            _this.connect(nom, mac_address)
+            .then(function() { prom_res() })
+            .catch(function(err) { prom_rej(error) })
+          }, 5000)
+        })
+      })
+    } else {
+      return _this.connect(nom, mac_address);
     }
   })
   .catch(error => {
