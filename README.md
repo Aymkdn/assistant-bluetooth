@@ -57,6 +57,8 @@ Ensuite, depuis IFTTT, voici un exemple d'applet à créer ; prenons la situatio
 
 Remarque : il est aussi possible de demander la déconnexion de l'enceinte sélectionnée en utilisant le mot clé **disconnect** seul lors de la commande PushBullet (étape 10 ci-dessus).
 
+**À noter** que s'il n'y a **qu'un seul appareil** Bluetooth lié au Google Home, pas besoin de ce plugin ; il suffit de dire : « OK Google, connecte le Bluetooth » pour qu'il cherche et connecte l'enceinte pré-enregistrée.
+
 En image :  
 
 ![applet IFTTT](https://user-images.githubusercontent.com/946315/39955270-389f661a-55cc-11e8-9d8e-e1404f3f045e.PNG)
