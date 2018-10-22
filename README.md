@@ -30,7 +30,7 @@ La section du fichier `configuration.json` qui nous intéresse devrait ressemble
 ```javascript
   "plugins": {
     "bluetooth": {
-      "hosts":"192.168.0.13"
+      "host":"192.168.0.13"
     }
   }
 ```
