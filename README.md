@@ -1,3 +1,9 @@
+# ATTENTION
+
+Google a changé son API durant l'été 2019, comme [expliqué ici](https://github.com/rithvikvibhu/GHLocalApi/issues/39), causant une erreur 403, rendant ce plugin inopérant.
+
+Cependant, il semble qu'il soit maintenant possible de demander à Google de basculer sur une autre enceinte Bluetooth en utilisant la commande vocale : `connecte toi à NOM_ENCEINTE`.
+
 # assistant-bluetooth
 
 Ce plugin de [`assistant-plugins`](https://aymkdn.github.io/assistant-plugins/) permet de connecter son Google Home à une enceinte Bluetooth de son choix, qui est déjà appareillée. Par exemple on peut lui dire de se connecter à l'enceinte de la cuisine, ou du salon, ou de la salle de bain, etc.
