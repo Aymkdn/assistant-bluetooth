@@ -1,8 +1,8 @@
 {
   "name": "assistant-bluetooth",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "description": "Plugin Bluetooth pour un Assistant via le package assistant-plugins",
-  "author": "aymkdn",
+  "contributors": ["aymkdn", "jzarca01"],
   "main":"bluetooth.js",
   "repository":"https://github.com/Aymkdn/assistant-bluetooth/",
   "license": "MIT"
