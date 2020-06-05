@@ -1,11 +1,14 @@
 var request = require('request-promise-native'); // si vous souhaitez faire des requêtes HTTP
 
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+
 /**
  * on crée une fonction `AssistantBluetooth`
  * @param {Object} configuration L'objet `configuration` qui vient du fichier configuration.json
  */
 var AssistantBluetooth = function(configuration) {
   this.host = configuration.host;
+  this.castToken = configuration.castToken;
 }
 
 /**
@@ -29,12 +32,14 @@ AssistantBluetooth.prototype.init = function(plugins) {
 AssistantBluetooth.prototype.disconnect = function() {
   console.log("[assistant-bluetooth] Déconnexion de l'enceinte Bluetooth actuelle");
   return request({
-    url:"http://"+this.host+":8008/setup/bluetooth/connect",
+    url:"https://"+this.host+":8443/setup/bluetooth/connect",
     method:"POST",
     json:true,
     body:{"connect":false},
     headers:{
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'cast-local-authorization-token': this.castToken
+
     }
   })
 };
@@ -49,12 +54,13 @@ AssistantBluetooth.prototype.disconnect = function() {
 AssistantBluetooth.prototype.connect = function(nom, mac_address) {
   console.log("[assistant-bluetooth] Connexion à "+nom);
   return request({
-    url:"http://"+this.host+":8008/setup/bluetooth/connect",
+    url:"https://"+this.host+":8443/setup/bluetooth/connect",
     method:"POST",
     json:true,
     body:{"connect":true,"mac_address":mac_address, "profile":2},
     headers:{
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'cast-local-authorization-token': this.castToken
     }
   })
 };
@@ -79,7 +85,10 @@ AssistantBluetooth.prototype.action = function(commande) {
 
   // on va d'abord listé les appareils Bluetooth
   return request({
-    url:"http://"+_this.host+":8008/setup/bluetooth/get_bonded"
+    url:"https://"+_this.host+":8443/setup/bluetooth/get_bonded",
+    headers: {
+      'cast-local-authorization-token': this.castToken
+    }
   })
   .then(function(response) {
     response = JSON.parse(response);
